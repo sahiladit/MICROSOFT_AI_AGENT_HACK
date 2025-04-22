@@ -1,0 +1,1 @@
+This is the advisor agent of our project. The goal is to provide advice to people about law and make them aware about their rights. 
