@@ -14,7 +14,7 @@ dotenv.load_dotenv()
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
 
-# LEGAL ADVISOR PLUGIN USING GEMINI
+# LEGAL ADVISOR PLUGIN 
 class LegalAdvisoryPlugin:
     @kernel_function(name="legal_advise", description="Provides legal guidance and explains legal concepts")
     async def get_advise(self, query: str) -> str:
