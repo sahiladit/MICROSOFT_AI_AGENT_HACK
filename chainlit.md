@@ -1,14 +1,10 @@
-# Welcome to Chainlit! 🚀🤖
 
-Hi there, Developer! 👋 We're excited to have you on board. Chainlit is a powerful tool designed to help you prototype, debug and share applications built on top of LLMs.
+# 👩‍⚖️ WELCOME TO **LAWGIC AI**
 
-## Useful Links 🔗
+![LOGO](public/legal.png)
 
-- **Documentation:** Get started with our comprehensive [Chainlit Documentation](https://docs.chainlit.io) 📚
-- **Discord Community:** Join our friendly [Chainlit Discord](https://discord.gg/k73SQ3FyUh) to ask questions, share your projects, and connect with other developers! 💬
+**Lawgic AI** helps you approach the law with clarity and confidence.  
+Whether you're seeking advice, understanding your rights, or preparing documents—  
+we combine **logic** with the **power of law** to support your legal journey.
 
-We can't wait to see what you create with Chainlit! Happy coding! 💻😊
-
-## Welcome screen
-
-To modify the welcome screen, edit the `chainlit.md` file at the root of your project. If you do not want a welcome screen, just leave this file empty.
+👉 Ask your question in plain English, Hindi, or Hinglish.
