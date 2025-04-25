@@ -8,9 +8,13 @@ from langdetect import detect
 import googlemaps
 from typing import List, Dict, Optional
 import json
+from semantic_kernel_utils import LegalAssistantKernel
 
 # Load environment variables
 load_dotenv()
+
+# Initialize Semantic Kernel
+legal_kernel = LegalAssistantKernel()
 
 # Azure OpenAI setup
 endpoint = os.getenv("ENDPOINT_URL")
@@ -208,12 +212,65 @@ async def on_chat_start():
 
 @cl.on_message
 async def on_message(message: cl.Message):
+    # Check for document attachments first
+    if message.elements:
+        # Process document analysis
+        for element in message.elements:
+            if element.type == "file":
+                # Show processing message
+                processing_msg = await cl.Message(content=f"Analyzing your document...").send()
+                
+                # Analyze document using Semantic Kernel
+                analysis_result = await legal_kernel.analyze_document(
+                    element.content,
+                    element.name.split('.')[-1].lower()
+                )
+                
+                if analysis_result["status"] == "error":
+                    await cl.Message(content=f"Error analyzing document: {analysis_result['error']}").send()
+                    continue
+                
+                # Get next steps using Semantic Kernel
+                next_steps_result = await legal_kernel.suggest_next_steps(analysis_result["analysis"])
+                
+                if next_steps_result["status"] == "error":
+                    await cl.Message(content=f"Error generating next steps: {next_steps_result['error']}").send()
+                    continue
+                
+                # Send analysis and next steps
+                await cl.Message(
+                    content=f"""
+                    **Document Analysis:**
+                    {analysis_result['analysis']}
+                    
+                    **Next Steps:**
+                    {next_steps_result['next_steps']}
+                    
+                    Would you like me to help you with any specific aspect of the analysis or next steps?
+                    """
+                ).send()
+                
+                # Remove processing message
+                await processing_msg.remove()
+                return
+
+    # Continue with existing message handling if no documents
     # Detect language and translate if needed
     original_lang = detect_language(message.content)
     cl.user_session.set("original_language", original_lang)
     
     msg_content = message.content if original_lang == "en" else translate_text(message.content)
     msg_content_lower = msg_content.lower()
+    
+    # Get legal advice using Semantic Kernel
+    if not message.elements:
+        try:
+            advice_result = await legal_kernel.get_legal_advice(msg_content)
+            if advice_result["status"] == "success":
+                await cl.Message(content=advice_result["advice"]).send()
+                return
+        except Exception as e:
+            print(f"Error getting legal advice: {str(e)}")
     
     context = cl.user_session.get("context")
     lawyer_search_state = cl.user_session.get("lawyer_search_state")
