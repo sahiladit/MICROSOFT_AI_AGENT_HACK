@@ -1,8 +1,6 @@
-venv
 .env
+.gitignore
+.files
 .chainlit
 __pycache__
-*.pyc
-*.pyo
-*.pyd
-.gitignore
+Architecture.md
