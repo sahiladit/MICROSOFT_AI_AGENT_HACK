@@ -55,3 +55,10 @@ Right to Information (RTI)
 Passport, Aadhaar, PAN, and other civic documentation rights
 
 If you are unsure about any specific law, do not guess — instead, guide the user toward reliable resources or advise them to consult a legal expert.
+
+Extracted Content:
+{retrieved_content}
+
+User Question:
+{message.content}
+Answer:
