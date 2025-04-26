@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Voice or Text Translator</title>
+</head>
+<body>
+    <h1>Translate Indian Languages ↔ English</h1>
+
+    <!-- Buttons for selecting input method -->
+    <h2>Choose your input method:</h2>
+    <button onclick="showTypingForm()">✍️ Type Text</button>
+    <button onclick="showVoiceForm()">🎤 Speak Text</button>
+
+    <!-- Text Input Form -->
+    <div id="textInputForm" style="display:none;">
+        <form method="post">
+            <textarea name="text" rows="4" cols="50" placeholder="Enter text here..."></textarea><br><br>
+            <input type="submit" value="Translate">
+        </form>
+    </div>
+
+    <!-- Voice Recording Form -->
+    <div id="voiceInputForm" style="display:none;">
+        <button onclick="startRecording()">🎤 Start Recording</button>
+        <button onclick="stopRecording()">🛑 Stop and Send</button>
+    </div>
+
+    <br><br>
+
+    <!-- Audio playback for response -->
+    {% if audio_path %}
+        <h2>Response Audio:</h2>
+        <audio controls>
+            <source src="{{ audio_path }}" type="audio/mpeg">
+            Your browser does not support the audio element.
+        </audio>
+    {% endif %}
+
+    {% if detected_language %}
+        <h2>Detected Language: {{ detected_language }}</h2>
+    {% endif %}
+
+    {% if english_text %}
+        <h2>Translated to English:</h2>
+        <p>{{ english_text }}</p>
+    {% endif %}
+
+    {% if back_translated_text %}
+        <h2>Back-Translated to Original Language:</h2>
+        <p>{{ back_translated_text }}</p>
+    {% endif %}
+
+    <script>
+        let mediaRecorder;
+        let audioChunks = [];
+
+        function showTypingForm() {
+            document.getElementById("textInputForm").style.display = "block";
+            document.getElementById("voiceInputForm").style.display = "none";
+        }
+
+        function showVoiceForm() {
+            document.getElementById("textInputForm").style.display = "none";
+            document.getElementById("voiceInputForm").style.display = "block";
+        }
+
+        // Start recording function
+        function startRecording() {
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    mediaRecorder = new MediaRecorder(stream);
+                    mediaRecorder.start();
+
+                    mediaRecorder.addEventListener("dataavailable", event => {
+                        audioChunks.push(event.data);
+                    });
+                });
+        }
+
+        // Stop recording and send data
+        function stopRecording() {
+            mediaRecorder.stop();
+
+            mediaRecorder.addEventListener("stop", () => {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                const formData = new FormData();
+                formData.append('file', audioBlob, 'recording.wav');
+
+                fetch('/', {
+                    method: 'POST',
+                    body: formData
+                }).then(response => {
+                    if (response.ok) {
+                        window.location.reload();  // Reload page to show response audio
+                    }
+                });
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Language Translator</title>
+</head>
+<body>
+    <h1>Translate Indian Languages ↔ English</h1>
+    <form method="post">
+        <textarea name="text" rows="4" cols="50" placeholder="Enter text here..."></textarea><br><br>
+        <input type="submit" value="Translate">
+    </form>
+
+    {% if detected_language %}
+        <h2>Detected Language: {{ detected_language }}</h2>
+    {% endif %}
+
+    {% if english_text %}
+        <h2>Translated to English:</h2>
+        <p>{{ english_text }}</p>
+    {% endif %}
+
+    {% if back_translated_text %}
+        <h2>Back-Translated to Original Language:</h2>
+        <p>{{ back_translated_text }}</p>
+    {% endif %}
+</body>
+</html>
