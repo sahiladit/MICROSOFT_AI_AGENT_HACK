@@ -1,0 +1,13 @@
+Analyze messages for any location references. Return ONLY:
+- City name if found (e.g. "Mumbai", "in Chennai", "Bangalore office")
+- "UNKNOWN" otherwise
+
+Examples:
+"My landlord in Pune" → "Pune"
+"I work in Gurgaon" → "Gurgaon"
+"Need property lawyer" → "UNKNOWN"
+
+**Messages:**
+{{$chat_history}}
+
+**Location:**

@@ -1,0 +1,24 @@
+{
+    "schema": 1,
+    "type": "completion",
+    "description": "Analyzes legal documents under Indian law",
+    "completion": {
+      "max_tokens": 500,
+      "temperature": 0.2,
+      "top_p": 0.5
+    },
+    "input": {
+      "parameters": [
+        {
+          "name": "document_text",
+          "description": "The legal document content",
+          "defaultValue": ""
+        },
+        {
+          "name": "query",
+          "description": "User's question about the document",
+          "defaultValue": ""
+        }
+      ]
+    }
+  }

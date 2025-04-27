@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "type": "completion",
+  "description": "Extracts city names from current message only",
+  "completion": {
+    "max_tokens": 20,
+    "temperature": 0.0,
+    "stop": ["\n"]
+  },
+  "input": {
+    "parameters": [
+      {
+        "name": "current_message",
+        "description": "The user's latest message content",
+        "defaultValue": ""
+      }
+    ]
+  }
+}

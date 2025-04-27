@@ -1,9 +1,0 @@
-{
-    "schema": 1,
-    "type": "completion",
-    "description": "Legal advice generator",
-    "completion": {
-      "service_id": "legal_advisor",
-      "service_name": "Legal Advisor" 
-    }
-}

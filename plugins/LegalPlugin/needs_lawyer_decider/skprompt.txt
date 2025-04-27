@@ -1,5 +1,0 @@
-Analyze the following legal advice and user query to determine if the user likely needs a lawyer.
-Respond ONLY with 'YES' or 'NO'.
-
-Legal Advice: {{$legal_advice}}
-User Query: {{$user_query}}

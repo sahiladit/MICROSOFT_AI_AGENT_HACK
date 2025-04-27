@@ -1,0 +1,19 @@
+{
+    "schema": 1,
+    "type": "completion",
+    "description": "Decides if immediate legal action is needed",
+    "completion": {
+      "max_tokens": 10,
+      "temperature": 0.1,
+      "top_p": 0.1
+    },
+    "input": {
+      "parameters": [
+        {
+          "name": "document_analysis",
+          "description": "Analysis of the legal document",
+          "defaultValue": ""
+        }
+      ]
+    }
+  }

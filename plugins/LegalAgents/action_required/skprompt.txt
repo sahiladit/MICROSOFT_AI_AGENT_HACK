@@ -1,0 +1,17 @@
+Determine if the user needs to take immediate legal action based on the document analysis. Respond ONLY with:
+
+"YES" if:
+- Document requires notarization
+- Registration is mandatory (property documents)
+- Court filing deadlines exist
+- Legal notices need to be sent
+
+"NO" if:
+- Document is informational only
+- Issues are minor/correctable
+- No immediate legal consequences
+
+**Document Analysis:**
+{{$document_analysis}}
+
+**Decision:**

@@ -1,0 +1,15 @@
+Analyze whether the user's legal situation requires professional legal representation based on the provided advice and query.
+
+**Rules:**
+- Respond ONLY with "YES" or "NO"
+- Consider complexity, potential penalties, and need for court representation
+- YES if involves: criminal charges, property disputes > ₹10 lakh, family law matters
+- NO if: general advice, minor civil matters, straightforward documentation
+
+**Legal Advice:**
+{{$legal_advice}}
+
+**Original Query:**
+{{$user_query}}
+
+**Decision:**

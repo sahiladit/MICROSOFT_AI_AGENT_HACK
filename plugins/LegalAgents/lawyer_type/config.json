@@ -1,0 +1,19 @@
+{
+    "schema": 1,
+    "type": "completion",
+    "description": "Identifies specific lawyer type needed",
+    "completion": {
+      "max_tokens": 30,
+      "temperature": 0.1,
+      "top_p": 0.1
+    },
+    "input": {
+      "parameters": [
+        {
+          "name": "legal_advice",
+          "description": "The legal advice provided",
+          "defaultValue": ""
+        }
+      ]
+    }
+  }

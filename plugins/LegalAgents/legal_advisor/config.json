@@ -1,0 +1,19 @@
+{
+    "schema": 1,
+    "type": "completion",
+    "description": "Provides legal advice based on Indian laws",
+    "completion": {
+      "max_tokens": 300,
+      "temperature": 0.3,
+      "top_p": 0.5
+    },
+    "input": {
+      "parameters": [
+        {
+          "name": "query",
+          "description": "The user's legal question",
+          "defaultValue": ""
+        }
+      ]
+    }
+  }

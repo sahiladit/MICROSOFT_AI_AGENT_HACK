@@ -1,0 +1,21 @@
+Identify the specific type of lawyer needed based on the legal advice. Return ONLY the specialty from these options:
+
+- Criminal
+- Civil
+- Family
+- Property/Real Estate
+- Corporate
+- Labor/Employment
+- Tax
+- Intellectual Property
+- Cyber Law
+- Consumer Protection
+- Constitutional
+- Banking/Finance
+- Immigration
+- Environmental
+
+**Legal Advice:**
+{{$legal_advice}}
+
+**Specialty:**

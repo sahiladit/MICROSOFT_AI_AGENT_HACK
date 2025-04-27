@@ -1,0 +1,9 @@
+{
+    "schema": 1,
+    "type": "completion",
+    "description": "Extracts location from chat history",
+    "completion": {
+      "max_tokens": 30,
+      "temperature": 0.1
+    }
+  }

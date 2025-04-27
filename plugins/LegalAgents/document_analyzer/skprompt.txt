@@ -1,0 +1,19 @@
+Analyze the provided legal document and answer the user's query. Follow these steps:
+
+1. Identify document type (contract, agreement, notice, etc.)
+2. Highlight any problematic clauses
+3. Explain legal consequences of issues
+4. Suggest remedies if possible
+
+**Rules:**
+- Reference specific Indian laws relevant to document
+- Flag non-compliant clauses with relevant IPC/Act sections
+- Keep analysis under 300 words
+
+**Document Content:**
+{{$document_text}}
+
+**User Query:**
+{{$query}}
+
+**Analysis:**
