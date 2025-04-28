@@ -7,7 +7,9 @@ from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion
 import googlemaps
 import requests
 from typing import Optional
-
+import docx
+from io import BytesIO
+import PyPDF2
 # Load environment variables
 load_dotenv()
 
@@ -172,24 +174,121 @@ async def detect_location_from_ip() -> Optional[str]:
 
 
 async def analyze_document(file: cl.File) -> str:
-    """Processes uploaded legal documents"""
+    """
+    Processes uploaded legal documents with direct file reading for text files.
+    
+    Args:
+        file: Chainlit File object containing the document to analyze
+        
+    Returns:
+        str: Analysis results with recommendations
+    """
     try:
-        content = file.content.decode('utf-8') if file.name.endswith('.txt') else "PDF/DOCX content extraction not implemented"
+        # Initialize progress message
+        progress_msg = cl.Message(content="📄 Processing document...")
+        await progress_msg.send()
+
+        # Extract text content based on file type
+        content = ""
+        file_path = file.path  # Chainlit provides the temporary file path
+
+        if file.name.endswith('.txt'):
+            try:
+                # Direct file reading for text files
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                if not content.strip():
+                    return "Error: Text file is empty or contains only whitespace."
+            except UnicodeDecodeError:
+                # Fallback for non-UTF-8 text files
+                with open(file_path, 'r', encoding='latin-1') as f:
+                    content = f.read()
+            except Exception as e:
+                return f"Text file reading error: {str(e)}"
+
+        elif file.name.endswith('.pdf'):
+            try:
+                with open(file_path, 'rb') as f:
+                    reader = PyPDF2.PdfReader(f)
+                    content = "\n".join([page.extract_text() or "" for page in reader.pages])
+                if not content.strip():
+                    return "Error: PDF appears to be empty or contains no extractable text."
+            except Exception as e:
+                return f"PDF processing error: {str(e)}"
+
+        elif file.name.endswith(('.docx', '.doc')):
+            try:
+                doc = docx.Document(file_path)
+                content = "\n".join([para.text for para in doc.paragraphs])
+                if not content.strip():
+                    return "Error: Word document appears to be empty."
+            except Exception as e:
+                return f"Word document processing error: {str(e)}"
+
+        else:
+            return f"Unsupported file type: {file.name.split('.')[-1]}"
+
+        # Update progress message
+        progress_msg.content = "🔍 Analyzing document content..."
+        await progress_msg.update()
+
+        # Get the legal plugin
         legal_plugin = cl.user_session.get("legal_plugin")
+        if not legal_plugin:
+            raise ValueError("Legal plugin not initialized")
+
+        # Create arguments for semantic kernel
+        arguments = KernelArguments(document_text=content[:4000])  # Limit to 4000 chars
+
+        # Invoke document analyzer
         analysis = await kernel.invoke(
-            legal_plugin["document_analyzer"],
-            arguments=KernelArguments(document_text=content)
+            plugin_name=legal_plugin.name,
+            function_name="document_analyzer",
+            arguments=arguments
         )
+
+        # Get action recommendation
+        progress_msg.content = "⚖️ Evaluating legal implications..."
+        await progress_msg.update()
+
         action_required = await kernel.invoke(
-            legal_plugin["action_required"],
+            plugin_name=legal_plugin.name,
+            function_name="action_required",
             arguments=KernelArguments(document_analysis=str(analysis))
         )
-        return (f"📄 Analysis:\n{analysis}\n\n" +
-                ("⚠️ Action Recommended" if "YES" in str(action_required).upper()
-                 else "✅ No Action Needed"))
-    except Exception as e:
-        return f"❌ Analysis failed: {str(e)}"
 
+        # Format the response
+        action_flag = str(action_required).strip().upper()
+        action_text = ("⚠️ **Action Recommended** - Consult a lawyer immediately" 
+                      if "YES" in action_flag 
+                      else "✅ **No Immediate Action Needed**")
+
+        # Create summary
+        summary = await kernel.invoke(
+            plugin_name=legal_plugin.name,
+            function_name="document_summarizer",
+            arguments=KernelArguments(document_text=content[:4000])
+        )
+        
+        response = (
+            f"## 📑 Document Analysis Summary\n"
+            f"{str(summary).strip()}\n\n"
+            f"## 🔍 Detailed Analysis\n"
+            f"{str(analysis).strip()}\n\n"
+            f"## ⚖️ Legal Assessment\n"
+            f"{action_text}\n\n"
+            f"📌 _Analysis based on {file.name}_"
+        )
+        
+        return response
+        
+    except Exception as e:
+        error_msg = (
+            f"❌ Document analysis failed\n\n"
+            f"**Error**: {str(e)}\n\n"
+            f"Please try again or upload a different file."
+        )
+        return error_msg
 
 async def get_lawyer_recommendations(coords: str, lawyer_type: str) -> str:
     """Finds nearby lawyers with ranking"""
@@ -228,13 +327,16 @@ async def handle_message(message: cl.Message):
     # Handle file attachments
     if message.elements:
         processing_msg = await cl.Message(content="📄 Analyzing document...").send()
-        analyses = [
-            await analyze_document(element)
-            for element in message.elements
-            if isinstance(element, cl.File)
-        ]
+        analyses = []
+        for element in message.elements:
+            if isinstance(element, cl.File):
+                analysis = await analyze_document(element)
+                analyses.append(analysis)
+        
         if analyses:
-            await processing_msg.update(content="\n\n".join(analyses))
+            # Create a new message with the results instead of updating
+            await cl.Message(content="\n\n".join(analyses)).send()
+            await processing_msg.remove()  # Remove the processing message
             return
     
     # Process text query
@@ -268,18 +370,17 @@ async def handle_message(message: cl.Message):
             )
             lawyer_type = str(lawyer_type).strip()
             
-            await processing_msg.stream_token(f"\n\n⚖️ Recommended: {lawyer_type} lawyer")
+            # Stream tokens instead of updating
+            final_content = f"\n\n⚖️ Recommended: {lawyer_type} lawyer"
             lawyers = await get_lawyer_recommendations(user_location, lawyer_type)
+            final_content += f"\n\n## Legal Advice\n{advice}\n\n## Local {lawyer_type} Lawyers\n{lawyers}"
             
-            await cl.Message(
-                content=f"## Legal Advice\n{advice}\n\n## Local {lawyer_type} Lawyers\n{lawyers}",
-                elements=[
-                    cl.Text(name="advice", content=str(advice)),
-                    cl.Text(name="lawyers", content=lawyers)
-                ]
-            ).send()
+            await processing_msg.stream_token(final_content)
         else:
-            await processing_msg.update(content=f"✅ Advice:\n{advice}")
+            # Create new message instead of updating
+            await cl.Message(content=f"✅ Advice:\n{advice}").send()
+            await processing_msg.remove()
             
     except Exception as e:
-        await processing_msg.update(content=f"❌ Processing error: {str(e)}")
+        await cl.Message(content=f"❌ Processing error: {str(e)}").send()
+        await processing_msg.remove()

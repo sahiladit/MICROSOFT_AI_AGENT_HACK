@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "type": "completion",
+  "description": "Summarizes legal documents by extracting key information and presenting it in a structured format",
+  "completion": {
+    "max_tokens": 500,
+    "temperature": 0.3,
+    "top_p": 0.5,
+    "presence_penalty": 0.0,
+    "frequency_penalty": 0.0
+  },
+  "input": {
+    "parameters": [
+      {
+        "name": "document_text",
+        "description": "The legal document text to be summarized",
+        "defaultValue": ""
+      }
+    ]
+  }
+}
